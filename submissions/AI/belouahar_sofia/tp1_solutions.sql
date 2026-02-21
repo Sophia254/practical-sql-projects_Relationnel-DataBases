@@ -1,8 +1,18 @@
+-- ============================================================
+-- SECTION 1 : CREATION DE LA BASE DE DONNEES
+-- ============================================================
+
+-- Suppression de la base si elle existe déjà
+-- Permet d'éviter les erreurs si on relance le script
 DROP DATABASE IF EXISTS university_db;
+
+-- Création de la base
 CREATE DATABASE university_db;
+
+-- Sélection de la base pour travailler dessus
 USE university_db;
 
-
+-- Table des départements : gère les différentes facultés/filières
 CREATE TABLE departments(
     department_id INT PRIMARY KEY AUTO_INCREMENT,
     department_name VARCHAR(100) NOT NULL,
@@ -13,6 +23,7 @@ CREATE TABLE departments(
 
 );
 
+-- Table des professeurs : liée à un département
 CREATE TABLE professors (
     professor_id INT PRIMARY KEY AUTO_INCREMENT,
     last_name VARCHAR(50) NOT NULL,
@@ -29,6 +40,7 @@ CREATE TABLE professors (
       
 );
 
+-- Table des étudiants : contient les infos personnelles et le niveau (L1 à M2)
 CREATE TABLE students (
     student_id INT PRIMARY KEY AUTO_INCREMENT,
     student_number VARCHAR(20) NOT NULL UNIQUE,
@@ -48,6 +60,7 @@ CREATE TABLE students (
       ON UPDATE CASCADE
 );
 
+-- Table des cours : chaque cours appartient à un département et un professeur
 CREATE TABLE courses (
     course_id INT PRIMARY KEY AUTO_INCREMENT,
     course_code VARCHAR(10) NOT NULL UNIQUE,
@@ -72,6 +85,8 @@ CREATE TABLE courses (
       ON UPDATE CASCADE
 );
 
+-- Table des inscriptions :
+-- Table pivot qui gère la relation "Plusieurs-à-Plusieurs" entre Étudiants et Cours
 CREATE TABLE enrollments (
     enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT NOT NULL,
@@ -94,6 +109,9 @@ CREATE TABLE enrollments (
       ON UPDATE CASCADE
 );
 
+
+-- Table des notes :
+-- Détaille les résultats obtenus pour chaque inscription
 CREATE TABLE grades (
     grade_id INT PRIMARY KEY AUTO_INCREMENT,
     enrollment_id INT NOT NULL,
@@ -110,12 +128,18 @@ CREATE TABLE grades (
       ON UPDATE CASCADE
 ); 
 
+-- Création d'index pour accélérer les recherches fréquentes sur les clés étrangères
 CREATE INDEX idx_student_department ON students(department_id);
 CREATE INDEX idx_course_professor ON courses(professor_id);
 CREATE INDEX idx_enrollment_student ON enrollments(student_id);
 CREATE INDEX idx_enrollment_course ON enrollments(course_id);
 CREATE INDEX idx_grades_enrollment ON grades(enrollment_id);
 
+
+-- ============================================================
+-- SECTION 2 : INSERTION DES DONNEES
+-- Données de test pour simuler un environnement réel
+-- ============================================================
 
 INSERT INTO departments (department_name, building, budget, department_head, creation_date) VALUES
 ('Computer Science', 'Building A', 500000.00, 'Dr. Smith', '2000-01-15'),
@@ -152,24 +176,29 @@ INSERT INTO courses (course_code, course_name, description, credits, semester, p
 
  
   INSERT INTO enrollments (student_id, course_id, enrollment_date, academic_year, status) VALUES
+
+-- ===== Année 2023-2024 =====
 (1, 1,'2023-09-01','2023-2024', 'Passed'),
-(1, 2,'2023-09-01','2023-2024', 'Passed'), 
-(2, 1,'2023-09-01','2023-2024', 'Failed'), 
-(2, 3,'2023-09-01','2023-2024', 'Passed'), 
+(1, 2,'2023-09-01','2023-2024', 'Passed'),
+(2, 1,'2023-09-01','2023-2024', 'Failed'),
+(2, 3,'2023-09-01','2023-2024', 'Passed'),
 (3, 4,'2023-09-01','2023-2024', 'Passed'),
-(4, 6,'2023-09-01','2023-2024', 'Passed'),
-(5, 5,'2023-09-01','2023-2024', 'Passed'), 
+(4, 6,'2023-09-01','2023-2024', 'Failed'),
+(5, 5,'2023-09-01','2023-2024', 'Passed'),
 (6, 1,'2023-09-01','2023-2024', 'Passed'),
-(7, 4,'2023-09-01','2023-2024', 'Passed'), 
-(8, 6,'2023-09-01','2023-2024', 'Failed'),
-(8, 5,'2023-09-01','2023-2024', 'Failed'),
 (7, 2,'2023-09-01','2023-2024', 'Failed'),
-(6, 3,'2023-09-01','2023-2024', 'Passed'), 
-(5, 1,'2023-09-01','2023-2024', 'Failed'), 
-(4, 4,'2023-09-01','2023-2024', 'Failed'),
-(3, 2,'2023-09-01','2023-2024', 'Failed'), 
-(2, 5,'2023-09-01','2023-2024', 'Failed'), 
-(1, 6,'2023-09-01','2023-2024', 'Failed');
+(8, 5,'2023-09-01','2023-2024', 'Failed'),
+
+-- ===== Année 2024-2025 =====
+(1, 3,'2024-09-01','2024-2025', 'In Progress'),
+(2, 2,'2024-09-01','2024-2025', 'In Progress'),
+(3, 5,'2024-09-01','2024-2025', 'In Progress'),
+(4, 4,'2024-09-01','2024-2025', 'Passed'),
+(5, 1,'2024-09-01','2024-2025', 'In Progress'),
+(6, 3,'2024-09-01','2024-2025', 'Passed'),
+(7, 6,'2024-09-01','2024-2025', 'In Progress'),
+(8, 6,'2024-09-01','2024-2025', 'Dropped');
+
 
 INSERT INTO grades (enrollment_id, evaluation_type, grade, coefficient, comments, evaluation_date) VALUES
 (1, 'Exam', 15.5, 0.7, 'Good performance', '2024-12-15'), 
